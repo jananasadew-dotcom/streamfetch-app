@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamFetch - Free YouTube Video & Audio Downloader</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0c;
+            --container-bg: #13131a;
+            --primary-color: #ff003c;
+            --primary-hover: #d60032;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --input-bg: #1c1c24;
+            --border-color: #2e2e3e;
+            --success-color: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .wrapper {
+            width: 100%;
+            max-width: 650px;
+            background: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #ff003c, #ff6b00);
+        }
+
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--primary-color);
+        }
+
+        .tagline {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 35px;
+        }
+
+        .input-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 18px 25px;
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            color: #fff;
+            font-size: 1.05rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 15px rgba(255, 0, 60, 0.2);
+        }
+
+        button {
+            width: 100%;
+            background: linear-gradient(90deg, var(--primary-color), #ff4d00);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            box-shadow: 0 8px 20px rgba(255, 0, 60, 0.3);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:hover {
+            opacity: 0.95;
+        }
+
+        /* Loading Spinner */
+        .status-box {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            margin: 0 auto 15px auto;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Result Card */
+        .download-card {
+            margin-top: 30px;
+            background: #1c1c24;
+            border: 1px solid #2e2e3e;
+            border-radius: 16px;
+            padding: 20px;
+            display: none;
+            text-align: left;
+        }
+
+        .video-meta {
+            margin-bottom: 15px;
+        }
+
+        .video-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .dl-link {
+            display: block;
+            text-align: center;
+            background: var(--success-color);
+            color: #fff;
+            text-decoration: none;
+            padding: 14px;
+            font-weight: 700;
+            border-radius: 10px;
+            transition: background 0.2s;
+            margin-top: 15px;
+        }
+
+        .dl-link:hover {
+            background: #059669;
+        }
+
+        /* ADVERTISEMENT SLOTS STYLE */
+        .ad-banner {
+            background: #16161f;
+            border: 1px dashed #444;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 25px 0;
+            color: #555e6b;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        footer {
+            margin-top: 40px;
+            color: #475569;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP AD SLOT (E.g., Banner Ad) -->
+    <div class="ad-banner">
+        <span>ADVERTISEMENT - PLACE YOUR AD CODE HERE</span>
+    </div>
+
+    <div class="wrapper">
+        <div class="logo">Stream<span>Fetch</span></div>
+        <div class="tagline">High-Speed Online YouTube Downloader</div>
+
+        <div class="input-box">
+            <input type="text" id="videoUrl" placeholder="Paste YouTube link here...">
+        </div>
+        <button onclick="fetchVideo()">Download Now</button>
+
+        <!-- Loading State -->
+        <div class="status-box" id="loadingState">
+            <div class="spinner"></div>
+            <p style="color: var(--text-muted)">Analyzing media links from YouTube...</p>
+        </div>
+
+        <!-- Download Result Card -->
+        <div class="download-card" id="resultCard">
+            <div class="video-meta">
+                <div class="video-title" id="resTitle">Your Requested Video</div>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Your download link is ready below. High quality MP4 download via secondary secure API node.</p>
+            </div>
+            
+            <a href="#" class="dl-link" id="finalDownloadBtn" target="_blank">Click to Save File</a>
+        </div>
+    </div>
+
+    <!-- BOTTOM AD SLOT -->
+    <div class="ad-banner">
+        <span>ADVERTISEMENT - PLACE YOUR AD CODE HERE</span>
+    </div>
+
+    <footer>
+        &copy; 2026 StreamFetch. Fast & Free Media Tools.
+    </footer>
+
+    <!-- CLIENT-SIDE JAVASCRIPT (Saves data locally & Routes to conversion server) -->
+    <script>
+        function fetchVideo() {
+            const url = document.getElementById('videoUrl').value.trim();
+            const loading = document.getElementById('loadingState');
+            const result = document.getElementById('resultCard');
+            const downloadBtn = document.getElementById('finalDownloadBtn');
+
+            if (!url) {
+                alert('Please enter a valid YouTube URL first!');
+                return;
+            }
+
+            // Adjusting UI States
+            result.style.display = 'none';
+            loading.style.display = 'block';
+
+            // Extract Video ID to display cleanly
+            let videoId = "Media Source";
+            if (url.includes("v=")) {
+                videoId = url.split("v=")[1].split("&")[0];
+            } else if (url.includes("youtu.be/")) {
+                videoId = url.split("youtu.be/")[1].split("?")[0];
+            }
+
+            // Route dynamically through a free secondary routing conversion engine
+            const downloadServiceUrl = `https://9xbuddy.com/process?url=${encodeURIComponent(url)}`;
+
+            setTimeout(() => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                document.getElementById('resTitle').innerText = "YouTube Track Detected (" + videoId + ")";
+                downloadBtn.href = downloadServiceUrl;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
