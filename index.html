@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="si">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -51,7 +51,7 @@
         .loading { color: #ffaa00; font-weight: bold; }
         .error { color: #ff3333; font-weight: bold; }
         
-        /* ඩවුන්ලෝඩ් බටන්ස් ලස්සන කිරීම */
+        /* Download Buttons Styling */
         .dl-box {
             background: #252525;
             padding: 20px;
@@ -83,9 +83,9 @@
 
 <div class="container">
     <h1>StreamFetch</h1>
-    <div class="subtitle">YouTube වීඩියෝ සහ සින්දු සැනසීමෙන් බාගත කරගන්න</div>
+    <div class="subtitle">Download YouTube Videos and Music Instantly</div>
     
-    <input type="text" id="videoUrl" placeholder="YouTube වීඩියෝ ලින්ක් එක මෙතනට පේස්ට් කරන්න...">
+    <input type="text" id="videoUrl" placeholder="Paste YouTube video link here...">
     <br>
     <button onclick="fetchVideo()">Fetch Video</button>
 
@@ -98,36 +98,32 @@ function fetchVideo() {
     const resultDiv = document.getElementById('result');
     
     if (!urlInput) {
-        resultDiv.innerHTML = "<p class='error'>කරුණාකර YouTube ලින්ක් එකක් ඇතුළත් කරන්න!</p>";
+        resultDiv.innerHTML = "<p class='error'>Please enter a YouTube link!</p>";
         return;
     }
 
-    resultDiv.innerHTML = "<p class='loading'>වීඩියෝව විශ්ලේෂණය කරමින් පවතී. සුළු මොහොතක් රැඳී සිටින්න...</p>";
+    resultDiv.innerHTML = "<p class='loading'>Analyzing video connection. Please wait...</p>";
 
-    // YouTube URL එකෙන් ID එක වෙන් කර ගැනීම
+    // Extracting Video ID from URL
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = urlInput.match(regExp);
     
     if (match && match[2].length == 11) {
         const videoId = match[2];
-        
-        // 100%ක් ආරක්ෂිත බාහිර ඩවුන්ලෝඩර් සේවා ලින්ක්ස් (No-iframe, ඍජු බොත්තම්)
-        const mp4_720 = `https://tw0b.com/api/widget/v2/${videoId}`;
-        const mp3_link = `https://convert2mp3s.com/api/widget/v2/${videoId}`;
 
         resultDiv.innerHTML = `
             <div class="dl-box">
-                <h3 style="color:#00adb5; margin-top:0;">වීඩියෝව සූදානම්! 🥳</h3>
-                <p style="font-size:14px; color:#aaa;">පල්ලෙහා තියෙන බටන් එකක් ක්ලික් කරලා ඔයාගේ සයිට් එක ඇතුළෙන්ම බාගත කරගන්න:</p>
+                <h3 style="color:#00adb5; margin-top:0;">Your Video is Ready! 🥳</h3>
+                <p style="font-size:14px; color:#aaa;">Click a button below to download directly from your site:</p>
                 <div class="btn-group">
-                    <a href="https://v3.mp3youtube.cc/download/${videoId}/mp4/720" target="_blank" class="dl-link">🎬 Download MP4 (Video HD)</a>
-                    <a href="https://v3.mp3youtube.cc/download/${videoId}/mp4/360" target="_blank" class="dl-link" style="background:#007acc;">🎥 Download MP4 (Video 360p)</a>
+                    <a href="https://v3.mp3youtube.cc/download/${videoId}/mp4/720" target="_blank" class="dl-link">🎬 Download MP4 (HD Video)</a>
+                    <a href="https://v3.mp3youtube.cc/download/${videoId}/mp4/360" target="_blank" class="dl-link" style="background:#007acc;">🎥 Download MP4 (360p Video)</a>
                     <a href="https://v3.mp3youtube.cc/download/${videoId}/mp3/128" target="_blank" class="dl-link dl-audio">🎵 Download MP3 (Audio)</a>
                 </div>
             </div>
         `;
     } else {
-        resultDiv.innerHTML = "<p class='error'>ඇතුළත් කල YouTube ලින්ක් එක වැරදියි! නැවත නිවැරදි ලින්ක් එකක් දමා උත්සාහ කරන්න.</p>";
+        resultDiv.innerHTML = "<p class='error'>Invalid YouTube link! Please check and try again.</p>";
     }
 }
 </script>
