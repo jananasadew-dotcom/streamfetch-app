@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamFetch - Direct YouTube Downloader</title>
+    <title>StreamFetch - Clean YouTube Downloader</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -48,36 +48,65 @@
         }
         button:hover { background-color: #cc0000; }
         #result { margin-top: 30px; }
-        .loading { color: #ffaa00; font-weight: bold; }
+        .error { color: #ff3333; font-weight: bold; }
+        
+        .dl-box {
+            background: #252525;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+        iframe {
+            border: none;
+            border-radius: 8px;
+            margin-top: 15px;
+            background: transparent;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>StreamFetch</h1>
-    <div class="subtitle">100% Pure Direct YouTube Downloader Without Redirects or Ads</div>
+    <div class="subtitle">Fast & Reliable YouTube Video Downloader</div>
     
     <input type="text" id="videoUrl" placeholder="Paste YouTube video link here...">
     <br>
-    <button onclick="startDownload()">Download Video</button>
+    <button onclick="processVideo()">Fetch Video</button>
 
     <div id="result"></div>
 </div>
 
 <script>
-function startDownload() {
+function processVideo() {
     const urlInput = document.getElementById('videoUrl').value.trim();
     const resultDiv = document.getElementById('result');
     
     if (!urlInput) {
-        alert("Please enter a valid YouTube link!");
+        alert("Please enter a YouTube link!");
         return;
     }
 
-    resultDiv.innerHTML = "<p class='loading'>📥 Your download has started! Please wait a moment for the browser to trigger the file save...</p>";
+    // Extracting Video ID
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = urlInput.match(regExp);
+    
+    if (match && match[2].length == 11) {
+        const videoId = match[2];
 
-    // වෙනත් කිසිම වෙබ් පේජ් එකකට නොයා, සයිට් එක ඇතුළෙන්ම කෙලින්ම බ්‍රවුසර් එකට ෆයිල් එක තල්ලු කිරීම
-    window.location.href = `/download?url=${encodeURIComponent(urlInput)}`;
+        // Using a highly trusted widget system that handles downloads natively inside an isolated frame
+        resultDiv.innerHTML = `
+            <div class="dl-box">
+                <h3 style="color:#00adb5; margin-top:0;">Your Video is Ready! 🥳</h3>
+                <p style="font-size:14px; color:#aaa;">Choose your preferred format below to save directly:</p>
+                
+                <iframe src="https://button.yt/api/button/?url=https://www.youtube.com/watch?v=${videoId}&f=mp4" width="100%" height="60px" scrolling="no"></iframe>
+                <iframe src="https://button.yt/api/button/?url=https://www.youtube.com/watch?v=${videoId}&f=mp3" width="100%" height="60px" scrolling="no"></iframe>
+            </div>
+        `;
+    } else {
+        resultDiv.innerHTML = "<p class='error'>Invalid YouTube link! Please try again.</p>";
+    }
 }
 </script>
 
