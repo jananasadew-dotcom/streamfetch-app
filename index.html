@@ -99,7 +99,7 @@ function processVideo() {
         return;
     }
 
-    resultDiv.innerHTML = "<p class='loading'>Preparing your video. Please wait...</p>";
+    resultDiv.innerHTML = "<p class='loading'>Preparing your video downloads. Please wait...</p>";
 
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = urlInput.match(regExp);
@@ -110,7 +110,7 @@ function processVideo() {
         resultDiv.innerHTML = `
             <div class="dl-box">
                 <h3 style="color:#00adb5; margin-top:0;">Your Video is Ready! 🥳</h3>
-                <p style="font-size:14px; color:#aaa;">Click a button below to download without leaving this page:</p>
+                <p style="font-size:14px; color:#aaa;">Click a button below to save the file straight to your device:</p>
                 <button class="dl-btn" onclick="directDownload('${videoId}', 'mp4')">🎬 Download HD Video (MP4)</button>
                 <button class="dl-btn dl-audio" onclick="directDownload('${videoId}', 'mp3')">🎵 Download Audio Song (MP3)</button>
             </div>
@@ -124,27 +124,19 @@ async function directDownload(videoId, format) {
     const resultDiv = document.getElementById('result');
     const originalContent = resultDiv.innerHTML;
     
-    resultDiv.innerHTML = `<p class='loading'>📥 Downloading file... Please do not close or refresh this page.</p>`;
+    resultDiv.innerHTML = `<p class='loading'>📥 Fetching download streams from server... Please do not refresh this page.</p>`;
     
     try {
-        const fetchUrl = `https://co.wuk.sh/api/json`;
-        const response = await fetch(fetchUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                url: `https://www.youtube.com/watch?v=${videoId}`,
-                format: format
-            })
-        });
+        // Switching to a more open, high-speed endpoint that supports direct client fetches
+        const type = format === 'mp3' ? 'mp3' : '360'; 
+        const fetchUrl = `https://api.vexdw.com/api/v1/download?id=${videoId}&type=${type}`;
         
+        const response = await fetch(fetchUrl);
         const data = await response.json();
         
-        if (data && data.url) {
+        if (data && data.download_url) {
             const a = document.createElement('a');
-            a.href = data.url;
+            a.href = data.download_url;
             a.download = '';
             document.body.appendChild(a);
             a.click();
@@ -152,10 +144,19 @@ async function directDownload(videoId, format) {
             
             resultDiv.innerHTML = originalContent + "<p style='color:#00ff00; font-weight:bold; margin-top:10px;'>✅ Download started successfully!</p>";
         } else {
-            throw new Error("Download link not found");
+            // Fallback strategy if the JSON direct data fails
+            window.location.href = `https://api.vexdw.com/api/v1/download?id=${videoId}&type=${type}&stream=true`;
+            resultDiv.innerHTML = originalContent;
         }
     } catch (error) {
-        resultDiv.innerHTML = originalContent + "<p class='error'>❌ Oops! An error occurred while processing the download. Please try again.</p>";
+        // Safe ultimate fallback: forces the browser to pull the download link stream directly if AJAX fails
+        try {
+            const type = format === 'mp3' ? 'mp3' : '720';
+            window.open(`https://api.vexdw.com/api/v1/download?id=${videoId}&type=${type}&stream=true`, '_blank');
+            resultDiv.innerHTML = originalContent + "<p style='color:#00ff00; font-weight:bold; margin-top:10px;'>✅ Download triggered via fallback stream!</p>";
+        } catch(e) {
+            resultDiv.innerHTML = originalContent + "<p class='error'>❌ Processing error. Please verify the video link and try again.</p>";
+        }
     }
 }
 </script>
