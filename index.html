@@ -3,26 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamFetch - Direct YouTube Downloader</title>
+    <title>StreamFetch - Real Direct Downloader</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: #121212;
             color: #ffffff;
             text-align: center;
             padding: 50px 20px;
-            margin: 0;
         }
         .container {
             max-width: 600px;
             background: #1e1e1e;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             margin: 0 auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        h1 { color: #ff0000; margin-bottom: 5px; }
-        .subtitle { color: #aaa; font-size: 14px; margin-bottom: 25px; }
+        h1 { color: #ff0000; }
         input[type="text"] {
             width: 85%;
             padding: 14px;
@@ -32,9 +30,7 @@
             background-color: #2a2a2a;
             color: #fff;
             font-size: 16px;
-            outline: none;
         }
-        input[type="text"]:focus { border-color: #ff0000; }
         button {
             background-color: #ff0000;
             color: white;
@@ -44,120 +40,39 @@
             cursor: pointer;
             border-radius: 8px;
             font-weight: bold;
-            transition: 0.3s;
         }
         button:hover { background-color: #cc0000; }
         #result { margin-top: 30px; }
         .loading { color: #ffaa00; font-weight: bold; }
-        .error { color: #ff3333; font-weight: bold; }
-        
-        .dl-box {
-            background: #252525;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #333;
-        }
-        .dl-btn {
-            display: block;
-            background: #00adb5;
-            color: #fff;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-            transition: 0.2s;
-        }
-        .dl-btn:hover { background: #008c95; }
-        .dl-audio { background: #ff5722; }
-        .dl-audio:hover { background: #e64a19; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>StreamFetch</h1>
-    <div class="subtitle">Download YouTube Videos and Music Directly To Your Device</div>
+    <p>100% Direct YouTube Downloader without any Ads or Redirects</p>
     
     <input type="text" id="videoUrl" placeholder="Paste YouTube video link here...">
     <br>
-    <button onclick="processVideo()">Fetch Video</button>
+    <button onclick="downloadVideo()">Download Now</button>
 
     <div id="result"></div>
 </div>
 
 <script>
-function processVideo() {
+function downloadVideo() {
     const urlInput = document.getElementById('videoUrl').value.trim();
     const resultDiv = document.getElementById('result');
     
     if (!urlInput) {
-        resultDiv.innerHTML = "<p class='error'>Please enter a YouTube link!</p>";
+        alert("Please enter a YouTube link!");
         return;
     }
 
-    resultDiv.innerHTML = "<p class='loading'>Preparing your video downloads. Please wait...</p>";
+    resultDiv.innerHTML = "<p class='loading'>📥 Downloading via your own server... Please wait, your file will appear shortly!</p>";
 
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = urlInput.match(regExp);
-    
-    if (match && match[2].length == 11) {
-        const videoId = match[2];
-
-        resultDiv.innerHTML = `
-            <div class="dl-box">
-                <h3 style="color:#00adb5; margin-top:0;">Your Video is Ready! 🥳</h3>
-                <p style="font-size:14px; color:#aaa;">Click a button below to save the file straight to your device:</p>
-                <button class="dl-btn" onclick="directDownload('${videoId}', 'mp4')">🎬 Download HD Video (MP4)</button>
-                <button class="dl-btn dl-audio" onclick="directDownload('${videoId}', 'mp3')">🎵 Download Audio Song (MP3)</button>
-            </div>
-        `;
-    } else {
-        resultDiv.innerHTML = "<p class='error'>Invalid YouTube link! Please try again.</p>";
-    }
-}
-
-async function directDownload(videoId, format) {
-    const resultDiv = document.getElementById('result');
-    const originalContent = resultDiv.innerHTML;
-    
-    resultDiv.innerHTML = `<p class='loading'>📥 Fetching download streams from server... Please do not refresh this page.</p>`;
-    
-    try {
-        // Switching to a more open, high-speed endpoint that supports direct client fetches
-        const type = format === 'mp3' ? 'mp3' : '360'; 
-        const fetchUrl = `https://api.vexdw.com/api/v1/download?id=${videoId}&type=${type}`;
-        
-        const response = await fetch(fetchUrl);
-        const data = await response.json();
-        
-        if (data && data.download_url) {
-            const a = document.createElement('a');
-            a.href = data.download_url;
-            a.download = '';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            
-            resultDiv.innerHTML = originalContent + "<p style='color:#00ff00; font-weight:bold; margin-top:10px;'>✅ Download started successfully!</p>";
-        } else {
-            // Fallback strategy if the JSON direct data fails
-            window.location.href = `https://api.vexdw.com/api/v1/download?id=${videoId}&type=${type}&stream=true`;
-            resultDiv.innerHTML = originalContent;
-        }
-    } catch (error) {
-        // Safe ultimate fallback: forces the browser to pull the download link stream directly if AJAX fails
-        try {
-            const type = format === 'mp3' ? 'mp3' : '720';
-            window.open(`https://api.vexdw.com/api/v1/download?id=${videoId}&type=${type}&stream=true`, '_blank');
-            resultDiv.innerHTML = originalContent + "<p style='color:#00ff00; font-weight:bold; margin-top:10px;'>✅ Download triggered via fallback stream!</p>";
-        } catch(e) {
-            resultDiv.innerHTML = originalContent + "<p class='error'>❌ Processing error. Please verify the video link and try again.</p>";
-        }
-    }
+    // Triggering download straight from your server domain without opening new tabs
+    window.location.href = `/download?url=${encodeURIComponent(urlInput)}`;
 }
 </script>
 
